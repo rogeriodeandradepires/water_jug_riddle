@@ -21,6 +21,8 @@ dependencies:
   align_positioned: ^3.0.0
   flutter_modular: ^4.4.0
   url_strategy: ^0.2.0
+  hooks_riverpod: ^1.0.3
+  flutter_hooks: ^0.18.2
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,15 @@
 {
-  "home_page_goal_label": "Mida los galones de agua del Balde Z de la manera más eficiente.",
+  "home_page_goal_label": "Toque para medir los galones de agua del Balde Z \nde la manera más eficiente",
+  "home_page_info": "Toque o Escriba para cambiar la capacidad en \nGalones de los Cubos X e Y",
+  "bucket_session_step_label": "Paso {index}:",
   "home_page_steps_label": "Pasos:",
   "home_page_button_label": "Calcular",
   "home_page_bucket_x_label": "Balde X",
   "home_page_bucket_y_label": "Balde Y",
-  "home_page_bucket_z_label": "Balde Z"
+  "home_page_bucket_z_label": "Balde Z",
+  "action_fill": "Llene el cubo {bucket}.",
+  "action_empty": "Vacíe el Cubo {bucket}.",
+  "action_transfer": "Transferir el Cubo {from} al Cubo {a}",
+  "action_solved": "¡Resuelto!",
+  "action_no_solution": "¡Sin Solución!"
 }

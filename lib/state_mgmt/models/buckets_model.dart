@@ -1,29 +1,42 @@
 import 'package:water_jug_riddle/helper/enums.dart';
 
 class BucketsModel {
-  Map<String, BucketStatesEnum> bucketsStateMap = {
-    'xState': BucketStatesEnum.empty,
-    'yState': BucketStatesEnum.empty,
-    'zState': BucketStatesEnum.empty
+  Map<BucketStateNameEnum, BucketStatesEnum> bucketsCurrentStateMap = {
+    BucketStateNameEnum.xBucketState: BucketStatesEnum.empty,
+    BucketStateNameEnum.yBucketState: BucketStatesEnum.empty,
+    BucketStateNameEnum.zBucketState: BucketStatesEnum.empty
+  };
+
+  Map<BucketStateNameEnum, BucketStatesEnum> bucketsPreviousStateMap = {
+    BucketStateNameEnum.xBucketState: BucketStatesEnum.empty,
+    BucketStateNameEnum.yBucketState: BucketStatesEnum.empty,
+    BucketStateNameEnum.zBucketState: BucketStatesEnum.empty
   };
 
   bool isCalculating = false;
+  bool shouldAnimate = true;
 
   List<int> bucketsCapacityList = [0, 0, 0];
-  List<String> stepsList = [];
+  List<Map> stepsList = [];
 
   BucketsModel();
 
   getFieldByName(String fieldName) {
     switch (fieldName) {
+      case "bucketsPreviousStateMap":
+        return bucketsPreviousStateMap;
       case "bucketsStateMap":
-        return bucketsStateMap;
+        return bucketsCurrentStateMap;
       case "bucketsCapacityList":
         return bucketsCapacityList;
       case "stepsList":
         return stepsList;
       case "isCalculating":
         return isCalculating;
+      case "shouldAnimate":
+        return shouldAnimate;
+      default:
+        return null;
     }
   }
 
@@ -33,7 +46,9 @@ class BucketsModel {
 
     return other is BucketsModel &&
         other.isCalculating == isCalculating &&
-        other.bucketsStateMap == bucketsStateMap &&
+        other.shouldAnimate == shouldAnimate &&
+        other.bucketsCurrentStateMap == bucketsCurrentStateMap &&
+        other.bucketsPreviousStateMap == bucketsPreviousStateMap &&
         other.bucketsCapacityList == bucketsCapacityList &&
         other.stepsList == stepsList;
   }
@@ -43,8 +58,10 @@ class BucketsModel {
 
   Set toJson() {
     return {
+      'shouldAnimate: $shouldAnimate, '
       'isCalculating: $isCalculating, '
-          'bucketsStateMap: $bucketsStateMap, '
+          'bucketsPreviousStateMap: $bucketsPreviousStateMap, '
+          'bucketsStateMap: $bucketsCurrentStateMap, '
           'bucketsCapacityList: $bucketsCapacityList, '
           'stepsList: $stepsList, '
     };

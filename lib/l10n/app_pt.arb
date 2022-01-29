@@ -1,8 +1,15 @@
 {
-  "home_page_goal_label": "Meça os galões de água do Balde Z da maneira mais eficiente.",
+  "home_page_goal_label": "Toque para medir os galões de água do Balde Z \nda maneira mais eficiente",
+  "home_page_info": "Toque ou Digite para alterar a capacidade de \nGalões dos Baldes X e Y",
+  "bucket_session_step_label": "Passo {index}:",
   "home_page_steps_label": "Passos:",
   "home_page_button_label": "Calcular",
   "home_page_bucket_x_label": "Balde X",
   "home_page_bucket_y_label": "Balde Y",
-  "home_page_bucket_z_label": "Balde Z"
+  "home_page_bucket_z_label": "Balde Z",
+  "action_fill": "Encha o Balde {bucket}",
+  "action_empty": "Esvazie o Balde {bucket}",
+  "action_transfer": "Transfira o Balde {from} para o Balde {to}",
+  "action_solved": "Solucionado!",
+  "action_no_solution": "Sem Solução!"
 }

@@ -9,8 +9,9 @@ import 'colors.dart';
 BoxDecoration mainBgDecoration = const BoxDecoration(
   gradient: LinearGradient(
     begin: Alignment.topCenter,
+    stops: [0,0.5,1],
     end: FractionalOffset.bottomCenter,
-    colors: [mainGradient1, mainGradient2],
+    colors: [Colors.white, Colors.white, mainGradient2],
   ),
 );
 
@@ -30,10 +31,10 @@ ShapeDecoration inputButtonRight = ShapeDecoration(
 
 ShapeDecoration buttonDefault = ShapeDecoration(
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-  color: primaryColor,
+  color: stPatrickBlue,
 );
 
 ShapeDecoration buttonFaded = ShapeDecoration(
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-  color: primaryColor.withOpacity(0.4),
+  color: stPatrickBlue.withOpacity(0.15),
 );

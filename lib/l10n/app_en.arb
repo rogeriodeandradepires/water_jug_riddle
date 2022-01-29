@@ -1,8 +1,15 @@
 {
-  "home_page_goal_label": "Measure Z Bucket's gallons of water in the most efficient way.",
+  "home_page_goal_label": "Tap to Measure Z Bucket's gallons of water \nin the most efficient way",
+  "home_page_info": "Tap or Type to change Buckets X and Y's \nGallons Capacity",
+  "bucket_session_step_label": "Step {index}:",
   "home_page_steps_label": "Steps:",
   "home_page_button_label": "Calculate",
   "home_page_bucket_x_label": "Bucket X",
   "home_page_bucket_y_label": "Bucket Y",
-  "home_page_bucket_z_label": "Bucket Z"
+  "home_page_bucket_z_label": "Bucket Z",
+  "action_fill": "Fill Bucket {bucket}",
+  "action_empty": "Empty Bucket {bucket}",
+  "action_transfer": "Transfer Bucket {from} to Bucket {to}",
+  "action_solved": "Solved!",
+  "action_no_solution": "No Solution!"
 }

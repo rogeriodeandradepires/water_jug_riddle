@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:water_jug_riddle/helper/enums.dart';
 import 'package:water_jug_riddle/state_mgmt/models/buckets_model.dart';
 import 'package:water_jug_riddle/state_mgmt/repositories/buckets_repository.dart';
 
@@ -9,6 +11,12 @@ class BucketsNotifier extends StateNotifier<BucketsState> {
   get bucketState => state;
 
   BucketsNotifier(this._bucketsRepository) : super(const BucketsStateInitial());
+
+  changeAnimateState(bool shouldAnimate){
+    if(mounted){
+      state = BucketsStateChanged(model..shouldAnimate = shouldAnimate);
+    }
+  }
 
   calculateBestSolution() {
     state = BucketsStateChanged(model..isCalculating = true);
@@ -27,15 +35,50 @@ class BucketsNotifier extends StateNotifier<BucketsState> {
     }
   }
 
+  changeBucketState(
+      {required BucketNameEnum bucket, required BucketStatesEnum newState}) {
+    debugPrint('changeBucketState: $bucket, $newState');
+    if (mounted) {
+      switch (bucket) {
+        case BucketNameEnum.xBucket:
+          state = BucketsStateChanged(model
+            ..bucketsPreviousStateMap[BucketStateNameEnum.xBucketState] = model
+                    .bucketsCurrentStateMap[BucketStateNameEnum.xBucketState] ??
+                BucketStatesEnum.empty
+            ..bucketsCurrentStateMap[BucketStateNameEnum.xBucketState] =
+                newState);
+          break;
+        case BucketNameEnum.yBucket:
+          state = BucketsStateChanged(model
+            ..bucketsPreviousStateMap[BucketStateNameEnum.yBucketState] = model
+                .bucketsCurrentStateMap[BucketStateNameEnum.yBucketState] ??
+                BucketStatesEnum.empty
+            ..bucketsCurrentStateMap[BucketStateNameEnum.yBucketState] =
+                newState);
+          break;
+        default:
+          state = BucketsStateChanged(model
+            ..bucketsPreviousStateMap[BucketStateNameEnum.zBucketState] = model
+                .bucketsCurrentStateMap[BucketStateNameEnum.zBucketState] ??
+                BucketStatesEnum.empty
+            ..bucketsCurrentStateMap[BucketStateNameEnum.zBucketState] =
+                newState);
+          break;
+      }
+    }
+  }
+
   changeBucketCapacity(
-      {required String bucket, required int value, bool? shouldSetNewValue}) {
+      {required BucketNameEnum bucket,
+      required int value,
+      bool? shouldSetNewValue}) {
     if (mounted) {
       if (model.stepsList.isNotEmpty) {
         state = BucketsStateChanged(model..stepsList = []);
       }
       state = BucketsStateChanged(model..isCalculating = true);
       switch (bucket) {
-        case 'x':
+        case BucketNameEnum.xBucket:
           state = (shouldSetNewValue ?? false)
               ? BucketsStateChanged(model
                 ..bucketsCapacityList[0] = value
@@ -44,7 +87,7 @@ class BucketsNotifier extends StateNotifier<BucketsState> {
                 ..bucketsCapacityList[0] += value
                 ..isCalculating = false);
           break;
-        case 'y':
+        case BucketNameEnum.yBucket:
           state = (shouldSetNewValue ?? false)
               ? BucketsStateChanged(model
                 ..bucketsCapacityList[1] = value
@@ -63,6 +106,28 @@ class BucketsNotifier extends StateNotifier<BucketsState> {
                 ..isCalculating = false);
           break;
       }
+    }
+  }
+
+  bool checkBucketEmptiness(
+      {required BucketNameEnum bucketName, required Map? bucketsStateMap}) {
+    if (bucketsStateMap == null) {
+      return true;
+    }
+
+    final _bucketsStates = [
+      bucketsStateMap[BucketStateNameEnum.xBucketState],
+      bucketsStateMap[BucketStateNameEnum.yBucketState],
+      bucketsStateMap[BucketStateNameEnum.zBucketState]
+    ];
+
+    switch (bucketName) {
+      case BucketNameEnum.xBucket:
+        return _bucketsStates[0] == BucketStatesEnum.empty ? true : false;
+      case BucketNameEnum.yBucket:
+        return _bucketsStates[1] == BucketStatesEnum.empty ? true : false;
+      default:
+        return _bucketsStates[2] == BucketStatesEnum.empty ? true : false;
     }
   }
 }

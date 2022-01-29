@@ -73,7 +73,7 @@ class DefaultButton extends ConsumerWidget {
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2.2, color: Colors.white),
+                              strokeWidth: 2.2, color: primaryColor),
                         ))
                       : Container()
                 ],
