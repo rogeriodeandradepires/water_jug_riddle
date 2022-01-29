@@ -9,7 +9,7 @@ namespace {
 constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
 
 // The number of Win32Window objects that currently exist.
-static int g_active_window_count = 0;
+    static int g_active_window_value = 0;
 
 using EnableNonClientDpiScaling = BOOL __stdcall(HWND hwnd);
 
@@ -94,12 +94,12 @@ void WindowClassRegistrar::UnregisterWindowClass() {
 }
 
 Win32Window::Win32Window() {
-  ++g_active_window_count;
+    ++g_active_window_value;
 }
 
 Win32Window::~Win32Window() {
-  --g_active_window_count;
-  Destroy();
+    --g_active_window_value;
+    Destroy();
 }
 
 bool Win32Window::CreateAndShow(const std::wstring& title,
@@ -196,13 +196,13 @@ Win32Window::MessageHandler(HWND hwnd,
 void Win32Window::Destroy() {
   OnDestroy();
 
-  if (window_handle_) {
-    DestroyWindow(window_handle_);
-    window_handle_ = nullptr;
-  }
-  if (g_active_window_count == 0) {
-    WindowClassRegistrar::GetInstance()->UnregisterWindowClass();
-  }
+    if (window_handle_) {
+        DestroyWindow(window_handle_);
+        window_handle_ = nullptr;
+    }
+    if (g_active_window_value == 0) {
+        WindowClassRegistrar::GetInstance()->UnregisterWindowClass();
+    }
 }
 
 Win32Window* Win32Window::GetThisFromHandle(HWND const window) noexcept {

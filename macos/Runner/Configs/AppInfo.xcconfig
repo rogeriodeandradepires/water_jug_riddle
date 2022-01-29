@@ -8,7 +8,7 @@
 PRODUCT_NAME = water_jug_riddle
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = dev.rogeriopires.waterJugRiddle
+PRODUCT_BUNDLE_IDENTIFIER = dev.rogeriopires.waterBucketRiddle
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2022 dev.rogeriopires. All rights reserved.
