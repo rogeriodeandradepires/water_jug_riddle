@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:water_jug_riddle/helper/enums.dart';
 
 abstract class BucketsRepository {
@@ -116,7 +115,6 @@ class PublicBucketsRepository implements BucketsRepository {
             'bucketValueTo': to
           });
         }
-
       }
 
       // If second bucket becomes full, empty it
@@ -155,7 +153,13 @@ class PublicBucketsRepository implements BucketsRepository {
   static List<Map> calculateSteps(int xBucket, int yBucket, int z) {
     // If gcd of n and m does not divide d
     // then solution is not possible
-    if ((z % gcd(yBucket, xBucket)) != 0) {
+    try {
+      if ((z % gcd(yBucket, xBucket)) != 0) {
+        return [
+          {'action': BucketActionsEnum.error}
+        ];
+      }
+    } catch (e) {
       return [
         {'action': BucketActionsEnum.error}
       ];
@@ -166,12 +170,29 @@ class PublicBucketsRepository implements BucketsRepository {
     //    m liter bucket
     // b) Vice versa of "a"
 
-    final firstCaseReturn =
-        pour(yBucket, xBucket, z, smallerBucket: BucketNameEnum.yBucket);
+    List<Map> firstCaseReturn;
+
+    try {
+      firstCaseReturn =
+          pour(yBucket, xBucket, z, smallerBucket: BucketNameEnum.yBucket);
+    } catch (e) {
+      firstCaseReturn = [
+        {'action': BucketActionsEnum.error}
+      ];
+    }
+
     // debugPrint("First case: $firstCaseReturn");
 
-    final secondCaseReturn =
-        pour(xBucket, yBucket, z, smallerBucket: BucketNameEnum.xBucket);
+    List<Map> secondCaseReturn;
+
+    try {
+      secondCaseReturn =
+          pour(xBucket, yBucket, z, smallerBucket: BucketNameEnum.xBucket);
+    } catch (e) {
+      secondCaseReturn = [
+        {'action': BucketActionsEnum.error}
+      ];
+    }
     // debugPrint("Second case: $secondCaseReturn");
 
     if (firstCaseReturn.length < secondCaseReturn.length) {

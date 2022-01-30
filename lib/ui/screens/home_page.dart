@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:align_positioned/align_positioned.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +15,7 @@ import 'package:water_jug_riddle/ui/shared/colors.dart';
 import 'package:water_jug_riddle/ui/shared/shape_styles.dart';
 import 'package:water_jug_riddle/ui/shared/text_styles.dart';
 import 'package:water_jug_riddle/ui/widgets/default_button.dart';
-import 'package:water_jug_riddle/ui/widgets/liquidify/liquid_fill.dart';
+import 'package:water_jug_riddle/ui/widgets/liquefy/liquid_fill.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({required ValueKey key}) : super(key: key);
@@ -64,167 +65,125 @@ class HomePage extends ConsumerWidget {
                 _buildBucketsSession(context, _stepsCount, _isWebLargerLayout,
                     _bucketsModel, _stepsList),
                 //Steps List
-                ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context).copyWith(
-                    dragDevices: {
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.mouse,
-                    },
-                    scrollbars: false,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        right: 22.0, left: 22.0, top: 14.0),
-                    child: ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: _stepsList.length,
-                      itemBuilder: (context, index) {
-                        final _isFirstItem = index == 0;
-                        final _isLastItem = index == _stepsList.length - 1;
+                Container(
+                  height: 100.hb,
+                  padding: EdgeInsets.only(
+                      right: kIsWeb ? 22.0 : 10,
+                      left: kIsWeb ? 22.0 : 10,
+                      top: 14.0),
+                  child: ListView.builder(
+                    physics: const ClampingScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: _stepsList.length,
+                    itemBuilder: (context, index) {
+                      final _isFirstItem = index == 0;
+                      final _isLastItem = index == _stepsList.length - 1;
 
-                        Map _currentMap = _stepsList[index];
-                        BucketActionsEnum _action = _currentMap['action'];
+                      Map _currentMap = _stepsList[index];
+                      BucketActionsEnum _action = _currentMap['action'];
 
-                        if (_action == BucketActionsEnum.error) {
-                          return _getListItem(
-                              context,
-                              _isFirstItem,
-                              true,
-                              index,
-                              AppLocalizations.of(context)!.action_no_solution,
-                              '',
-                              '',
-                              '',
-                              0.0,
-                              0.0,
-                              0.0,
-                              0,
-                              isError: true);
-                        }
+                      if (_action == BucketActionsEnum.error) {
+                        return _getListItem(
+                            context,
+                            _isFirstItem,
+                            true,
+                            index,
+                            AppLocalizations.of(context)!.action_no_solution,
+                            [0, 0, 0],
+                            [0.0, 0.0, 0.0],
+                            isError: true);
+                      }
 
-                        final _xBucketCapacity =
-                            _bucketsModel?.bucketsCapacityList[0] ?? 0;
-                        final _yBucketCapacity =
-                            _bucketsModel?.bucketsCapacityList[1] ?? 0;
-                        final _zBucketCapacity =
-                            _bucketsModel?.bucketsCapacityList[2] ?? 0;
+                      final _xBucketCapacity =
+                          _bucketsModel?.bucketsCapacityList[0] ?? 0;
+                      final _yBucketCapacity =
+                          _bucketsModel?.bucketsCapacityList[1] ?? 0;
+                      final _zBucketCapacity =
+                          _bucketsModel?.bucketsCapacityList[2] ?? 0;
 
-                        BucketNameEnum _bucketName = _currentMap['bucketName'];
+                      BucketNameEnum _bucketName = _currentMap['bucketName'];
 
-                        final _stepText = getStepText(context,
-                            currentMap: _currentMap, action: _action);
+                      final _stepText = getStepText(context,
+                          currentMap: _currentMap, action: _action);
 
-                        double _bucketValue = _currentMap['bucketValue'];
-                        double _bucketValueTo = _currentMap['bucketValueTo'];
+                      double _bucketValue =
+                          double.parse('${_currentMap['bucketValue']}');
+                      double _bucketValueTo =
+                          double.parse('${_currentMap['bucketValueTo']}');
 
-                        double _xBucketEndProgress = 0.0;
-                        double _yBucketEndProgress = 0.0;
-                        double _zBucketEndProgress = 0.0;
+                      double _xBucketEndProgress = 0.0;
+                      double _yBucketEndProgress = 0.0;
+                      double _zBucketEndProgress = 0.0;
 
+                      switch (_bucketName) {
+                        case BucketNameEnum.xBucket:
+                          _xBucketEndProgress = _bucketValue;
+                          _yBucketEndProgress = _bucketValueTo;
+                          break;
+                        case BucketNameEnum.yBucket:
+                          _xBucketEndProgress = _bucketValueTo;
+                          _yBucketEndProgress = _bucketValue;
+                          break;
+                        default:
+                          break;
+                      }
+
+                      if (_action == BucketActionsEnum.transfer) {
                         switch (_bucketName) {
                           case BucketNameEnum.xBucket:
-                            _xBucketEndProgress = _bucketValue;
                             _yBucketEndProgress = _bucketValueTo;
                             break;
                           case BucketNameEnum.yBucket:
                             _xBucketEndProgress = _bucketValueTo;
-                            _yBucketEndProgress = _bucketValue;
                             break;
                           default:
                             break;
                         }
+                      }
 
-                        if (_action == BucketActionsEnum.transfer) {
-                          switch (_bucketName) {
-                            case BucketNameEnum.xBucket:
-                              _yBucketEndProgress = _bucketValueTo;
-                              break;
-                            case BucketNameEnum.yBucket:
-                              _xBucketEndProgress = _bucketValueTo;
-                              break;
-                            default:
-                              break;
-                          }
-                        }
+                      final _bucketsCapacitiesList = [
+                        _xBucketCapacity,
+                        _yBucketCapacity,
+                        _zBucketCapacity,
+                      ];
 
-                        String _xBucketStringValue =
-                            '$_xBucketEndProgress/$_xBucketCapacity';
-                        String _yBucketStringValue =
-                            '$_yBucketEndProgress/$_yBucketCapacity';
-                        String _zBucketStringValue =
-                            '$_zBucketEndProgress/$_zBucketCapacity';
+                      final _bucketsProgressList = [
+                        _xBucketEndProgress,
+                        _yBucketEndProgress,
+                        _zBucketEndProgress,
+                      ];
 
-                        if (_xBucketCapacity != 0 &&
-                            _xBucketEndProgress != 0 &&
-                            _xBucketEndProgress == _xBucketCapacity) {
-                          _xBucketEndProgress = 100.0;
-                        }
-
-                        if (_yBucketCapacity != 0 &&
-                            _yBucketEndProgress != 0 &&
-                            _yBucketEndProgress == _yBucketCapacity) {
-                          _yBucketEndProgress = 100.0;
-                        }
-
-                        if (_zBucketCapacity != 0 &&
-                            _zBucketEndProgress != 0 &&
-                            _zBucketEndProgress == _zBucketCapacity) {
-                          _zBucketEndProgress = 100.0;
-                        }
-
-                        return _isLastItem
-                            ? Column(
-                                children: [
-                                  _getListItem(
+                      return _isLastItem
+                          ? Column(
+                              children: [
+                                _getListItem(
                                     context,
                                     _isFirstItem,
                                     false,
                                     index,
                                     _stepText,
-                                    _xBucketStringValue,
-                                    _yBucketStringValue,
-                                    _zBucketStringValue,
-                                    _xBucketEndProgress,
-                                    _yBucketEndProgress,
-                                    _zBucketEndProgress,
-                                    _zBucketCapacity,
-                                  ),
-                                  _getListItem(
-                                    context,
-                                    false,
-                                    true,
-                                    index,
-                                    _stepText,
-                                    '0/$_xBucketCapacity',
-                                    '0/$_yBucketCapacity',
-                                    '$_zBucketCapacity/$_zBucketCapacity',
-                                    0.0,
-                                    0.0,
-                                    _zBucketCapacity == 0 &&
-                                            _zBucketEndProgress == 0
-                                        ? 0.0
-                                        : 100.0,
-                                    _zBucketCapacity,
-                                  )
-                                ],
-                              )
-                            : _getListItem(
-                                context,
-                                _isFirstItem,
-                                _isLastItem,
-                                index,
-                                _stepText,
-                                _xBucketStringValue,
-                                _yBucketStringValue,
-                                _zBucketStringValue,
-                                _xBucketEndProgress,
-                                _yBucketEndProgress,
-                                _zBucketEndProgress,
-                                _zBucketCapacity,
-                              );
-                      },
-                    ),
+                                    _bucketsCapacitiesList,
+                                    _bucketsProgressList),
+                                _getListItem(context, false, true, index,
+                                    _stepText, _bucketsCapacitiesList, [
+                                  0.0,
+                                  0.0,
+                                  _zBucketCapacity == 0 &&
+                                          _zBucketEndProgress == 0
+                                      ? 0.0
+                                      : 100.0,
+                                ])
+                              ],
+                            )
+                          : _getListItem(
+                              context,
+                              _isFirstItem,
+                              _isLastItem,
+                              index,
+                              _stepText,
+                              _bucketsCapacitiesList,
+                              _bucketsProgressList);
+                    },
                   ),
                 ),
                 const SizedBox(
@@ -375,11 +334,6 @@ class HomePage extends ConsumerWidget {
     _zBucketTfController.selection = TextSelection.fromPosition(
         TextPosition(offset: _zBucketTfController.text.length));
 
-    List<Map> _fillingProgresses = _getFillingProgresses(
-        _stepsList,
-        _bucketsModel?.bucketsCurrentStateMap ?? {},
-        _bucketsModel?.bucketsPreviousStateMap ?? {});
-
     return //Bucket's Session Column
         Consumer(builder: (context, ref, child) {
       return Column(
@@ -401,7 +355,7 @@ class HomePage extends ConsumerWidget {
           ),
           //Buckets Session
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
+            padding: EdgeInsets.symmetric(horizontal: kIsWeb ? 18.0 : 5.0),
             child: SizedBox(
               width: _isWebLargerLayout ? 500 : 100.wb,
               child: Row(
@@ -430,7 +384,7 @@ class HomePage extends ConsumerWidget {
                               startProgress: 0.0,
                               endProgress: _xBucketCapacity * 10 > 100
                                   ? 100.0
-                                  : _xBucketCapacity * 10,
+                                  : double.parse('${_xBucketCapacity * 10}'),
                               bucketName: BucketNameEnum.xBucket,
                             ),
                           ),
@@ -484,33 +438,44 @@ class HomePage extends ConsumerWidget {
                                 SizedBox(
                                   height: 50,
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      SizedBox(
-                                        height: 50,
-                                        child: Container(
-                                          decoration: inputButtonLeft,
-                                          child: IconButton(
-                                            icon: const Icon(
-                                              Icons.remove,
-                                              color: Colors.white,
+                                      Expanded(
+                                        flex: 2,
+                                        child: SizedBox(
+                                          height: 50,
+                                          child: Container(
+                                            decoration: inputButtonLeft,
+                                            child: AlignPositioned(
+                                              moveByChildWidth:
+                                                  kIsWeb ? 0.0 : -0.1,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.remove,
+                                                  color: Colors.white,
+                                                ),
+                                                onPressed: () {
+                                                  if (_xBucketCapacity > 0) {
+                                                    ref
+                                                        .read(
+                                                            bucketsNotifierProvider
+                                                                .notifier)
+                                                        .changeBucketCapacity(
+                                                            bucket:
+                                                                BucketNameEnum
+                                                                    .xBucket,
+                                                            value: -1);
+                                                  }
+                                                },
+                                              ),
                                             ),
-                                            onPressed: () {
-                                              if (_xBucketCapacity > 0) {
-                                                ref
-                                                    .read(
-                                                        bucketsNotifierProvider
-                                                            .notifier)
-                                                    .changeBucketCapacity(
-                                                        bucket: BucketNameEnum
-                                                            .xBucket,
-                                                        value: -1);
-                                              }
-                                            },
                                           ),
                                         ),
                                       ),
                                       Expanded(
+                                        flex: 3,
                                         child: Padding(
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 5.0),
@@ -524,24 +489,32 @@ class HomePage extends ConsumerWidget {
                                               textAlign: TextAlign.center,
                                             )),
                                       ),
-                                      SizedBox(
-                                        height: 50,
-                                        child: Container(
-                                          decoration: inputButtonRight,
-                                          child: IconButton(
-                                            icon: const Icon(
-                                              Icons.add,
-                                              color: Colors.white,
+                                      Expanded(
+                                        flex: 2,
+                                        child: SizedBox(
+                                          height: 50,
+                                          child: Container(
+                                            decoration: inputButtonRight,
+                                            child: AlignPositioned(
+                                              moveByChildWidth:
+                                                  kIsWeb ? 0.0 : -0.1,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.add,
+                                                  color: Colors.white,
+                                                ),
+                                                onPressed: () {
+                                                  ref
+                                                      .read(
+                                                          bucketsNotifierProvider
+                                                              .notifier)
+                                                      .changeBucketCapacity(
+                                                          bucket: BucketNameEnum
+                                                              .xBucket,
+                                                          value: 1);
+                                                },
+                                              ),
                                             ),
-                                            onPressed: () {
-                                              ref
-                                                  .read(bucketsNotifierProvider
-                                                      .notifier)
-                                                  .changeBucketCapacity(
-                                                      bucket: BucketNameEnum
-                                                          .xBucket,
-                                                      value: 1);
-                                            },
                                           ),
                                         ),
                                       ),
@@ -577,7 +550,7 @@ class HomePage extends ConsumerWidget {
                               startProgress: 0.0,
                               endProgress: _yBucketCapacity * 10 > 100
                                   ? 100.0
-                                  : _yBucketCapacity * 10,
+                                  : double.parse('${_yBucketCapacity * 10}'),
                               bucketName: BucketNameEnum.yBucket,
                             ),
                           ),
@@ -631,33 +604,43 @@ class HomePage extends ConsumerWidget {
                                 SizedBox(
                                   height: 50,
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      SizedBox(
-                                        height: 50,
-                                        child: Container(
-                                          decoration: inputButtonLeft,
-                                          child: IconButton(
-                                            icon: const Icon(
-                                              Icons.remove,
-                                              color: Colors.white,
+                                      Expanded(
+                                        flex: 2,
+                                        child: SizedBox(
+                                          height: 50,
+                                          child: Container(
+                                            decoration: inputButtonLeft,
+                                            child: AlignPositioned(
+                                              moveByChildWidth:
+                                                  kIsWeb ? 0.0 : -0.1,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.remove,
+                                                  color: Colors.white,
+                                                ),
+                                                onPressed: () {
+                                                  if (_yBucketCapacity > 0) {
+                                                    ref
+                                                        .read(
+                                                            bucketsNotifierProvider
+                                                                .notifier)
+                                                        .changeBucketCapacity(
+                                                            bucket:
+                                                                BucketNameEnum
+                                                                    .yBucket,
+                                                            value: -1);
+                                                  }
+                                                },
+                                              ),
                                             ),
-                                            onPressed: () {
-                                              if (_yBucketCapacity > 0) {
-                                                ref
-                                                    .read(
-                                                        bucketsNotifierProvider
-                                                            .notifier)
-                                                    .changeBucketCapacity(
-                                                        bucket: BucketNameEnum
-                                                            .yBucket,
-                                                        value: -1);
-                                              }
-                                            },
                                           ),
                                         ),
                                       ),
                                       Expanded(
+                                        flex: 3,
                                         child: Padding(
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 5.0),
@@ -671,24 +654,32 @@ class HomePage extends ConsumerWidget {
                                               textAlign: TextAlign.center,
                                             )),
                                       ),
-                                      SizedBox(
-                                        height: 50,
-                                        child: Container(
-                                          decoration: inputButtonRight,
-                                          child: IconButton(
-                                            icon: const Icon(
-                                              Icons.add,
-                                              color: Colors.white,
+                                      Expanded(
+                                        flex: 2,
+                                        child: SizedBox(
+                                          height: 50,
+                                          child: Container(
+                                            decoration: inputButtonRight,
+                                            child: AlignPositioned(
+                                              moveByChildWidth:
+                                                  kIsWeb ? 0.0 : -0.1,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.add,
+                                                  color: Colors.white,
+                                                ),
+                                                onPressed: () {
+                                                  ref
+                                                      .read(
+                                                          bucketsNotifierProvider
+                                                              .notifier)
+                                                      .changeBucketCapacity(
+                                                          bucket: BucketNameEnum
+                                                              .yBucket,
+                                                          value: 1);
+                                                },
+                                              ),
                                             ),
-                                            onPressed: () {
-                                              ref
-                                                  .read(bucketsNotifierProvider
-                                                      .notifier)
-                                                  .changeBucketCapacity(
-                                                      bucket: BucketNameEnum
-                                                          .yBucket,
-                                                      value: 1);
-                                            },
                                           ),
                                         ),
                                       ),
@@ -724,7 +715,7 @@ class HomePage extends ConsumerWidget {
                               startProgress: 0.0,
                               endProgress: _zBucketCapacity * 10 > 100
                                   ? 100.0
-                                  : _zBucketCapacity * 10,
+                                  : double.parse('${_zBucketCapacity * 10}'),
                               bucketName: BucketNameEnum.zBucket,
                             ),
                           ),
@@ -780,31 +771,40 @@ class HomePage extends ConsumerWidget {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      SizedBox(
-                                        height: 50,
-                                        child: Container(
-                                          decoration: inputButtonLeft,
-                                          child: IconButton(
-                                            icon: const Icon(
-                                              Icons.remove,
-                                              color: Colors.white,
+                                      Expanded(
+                                        flex: 2,
+                                        child: SizedBox(
+                                          height: 50,
+                                          child: Container(
+                                            decoration: inputButtonLeft,
+                                            child: AlignPositioned(
+                                              moveByChildWidth:
+                                                  kIsWeb ? 0.0 : -0.1,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.remove,
+                                                  color: Colors.white,
+                                                ),
+                                                onPressed: () {
+                                                  if (_zBucketCapacity > 0) {
+                                                    ref
+                                                        .read(
+                                                            bucketsNotifierProvider
+                                                                .notifier)
+                                                        .changeBucketCapacity(
+                                                            bucket:
+                                                                BucketNameEnum
+                                                                    .zBucket,
+                                                            value: -1);
+                                                  }
+                                                },
+                                              ),
                                             ),
-                                            onPressed: () {
-                                              if (_zBucketCapacity > 0) {
-                                                ref
-                                                    .read(
-                                                        bucketsNotifierProvider
-                                                            .notifier)
-                                                    .changeBucketCapacity(
-                                                        bucket: BucketNameEnum
-                                                            .zBucket,
-                                                        value: -1);
-                                              }
-                                            },
                                           ),
                                         ),
                                       ),
                                       Expanded(
+                                        flex: 3,
                                         child: Padding(
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 5.0),
@@ -818,24 +818,32 @@ class HomePage extends ConsumerWidget {
                                               textAlign: TextAlign.center,
                                             )),
                                       ),
-                                      SizedBox(
-                                        height: 50,
-                                        child: Container(
-                                          decoration: inputButtonRight,
-                                          child: IconButton(
-                                            icon: const Icon(
-                                              Icons.add,
-                                              color: Colors.white,
+                                      Expanded(
+                                        flex: 2,
+                                        child: SizedBox(
+                                          height: 50,
+                                          child: Container(
+                                            decoration: inputButtonRight,
+                                            child: AlignPositioned(
+                                              moveByChildWidth:
+                                                  kIsWeb ? 0.0 : -0.1,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.add,
+                                                  color: Colors.white,
+                                                ),
+                                                onPressed: () {
+                                                  ref
+                                                      .read(
+                                                          bucketsNotifierProvider
+                                                              .notifier)
+                                                      .changeBucketCapacity(
+                                                          bucket: BucketNameEnum
+                                                              .zBucket,
+                                                          value: 1);
+                                                },
+                                              ),
                                             ),
-                                            onPressed: () {
-                                              ref
-                                                  .read(bucketsNotifierProvider
-                                                      .notifier)
-                                                  .changeBucketCapacity(
-                                                      bucket: BucketNameEnum
-                                                          .zBucket,
-                                                      value: 1);
-                                            },
                                           ),
                                         ),
                                       ),
@@ -898,22 +906,64 @@ class HomePage extends ConsumerWidget {
     });
   }
 
-  _getListItem(
-      BuildContext context,
-      _isFirstItem,
-      _isLastItem,
-      index,
-      _stepText,
-      _xBucketStringValue,
-      _yBucketStringValue,
-      _zBucketStringValue,
-      _xBucketEndProgress,
-      _yBucketEndProgress,
-      _zBucketEndProgress,
-      _zBucketCapacity,
+  _getListItem(BuildContext context, _isFirstItem, _isLastItem, index,
+      _stepText, _bucketsCapacity, _bucketsProgress,
       {bool? isError}) {
-
     BoxDecoration decoration;
+
+    String _xBucketStringValue;
+    String _yBucketStringValue;
+    String _zBucketStringValue;
+
+    if (_bucketsCapacity[0] > 10 ||
+        _bucketsCapacity[0] > 10 ||
+        _bucketsCapacity[0] > 10) {
+      _xBucketStringValue = '';
+      _yBucketStringValue = '';
+      _zBucketStringValue = '';
+    } else {
+      if (_bucketsProgress[0] >= 100.0) {
+        _xBucketStringValue =
+            '${_bucketsCapacity[0] > 10 ? '' : _bucketsCapacity[0]}';
+      } else {
+        _xBucketStringValue =
+            '${double.parse('${_bucketsProgress[0]}').toStringAsFixed(0)}${kIsWeb ? '/${_bucketsCapacity[0]}' : ''}';
+      }
+
+      if (_bucketsProgress[1] >= 100.0) {
+        _yBucketStringValue =
+            '${_bucketsCapacity[1] > 10 ? '' : _bucketsCapacity[1]}';
+      } else {
+        _yBucketStringValue =
+            '${double.parse('${_bucketsProgress[1]}').toStringAsFixed(0)}${kIsWeb ? '/${_bucketsCapacity[1]}' : ''}';
+      }
+
+      if (_bucketsProgress[0] >= 100.0) {
+        _zBucketStringValue =
+            '${_bucketsCapacity[2] > 10 ? '' : _bucketsCapacity[2]}';
+      } else {
+        _zBucketStringValue =
+            '${double.parse('${_bucketsProgress[2]}').toStringAsFixed(0)}${kIsWeb ? '/${_bucketsCapacity[2]}' : ''}';
+      }
+    }
+
+    if (_bucketsCapacity[0] != 0 &&
+        _bucketsProgress[0] != 0 &&
+        _bucketsProgress[0] == _bucketsCapacity[0]) {
+      _bucketsProgress[0] = 100.0;
+    }
+
+    if (_bucketsCapacity[1] != 0 &&
+        _bucketsProgress[1] != 0 &&
+        _bucketsProgress[1] == _bucketsCapacity[1]) {
+      _bucketsProgress[1] = 100.0;
+    }
+
+    if (_bucketsCapacity[2] != 0 &&
+        _bucketsProgress[2] != 0 &&
+        _bucketsProgress[2] == _bucketsCapacity[2]) {
+      _bucketsProgress[2] = 100.0;
+    }
 
     if (isError ?? false) {
       decoration = fullStepLineDecoration;
@@ -999,7 +1049,7 @@ class HomePage extends ConsumerWidget {
                                       const Duration(milliseconds: 1500),
                                   key: null,
                                   startProgress: 0.0,
-                                  endProgress: _xBucketEndProgress,
+                                  endProgress: _bucketsProgress[0],
                                   bucketName: BucketNameEnum.xBucket,
                                 ),
                               ),
@@ -1021,7 +1071,7 @@ class HomePage extends ConsumerWidget {
                                       const Duration(milliseconds: 1500),
                                   key: null,
                                   startProgress: 0.0,
-                                  endProgress: _yBucketEndProgress,
+                                  endProgress: _bucketsProgress[1],
                                   bucketName: BucketNameEnum.yBucket,
                                 ),
                               ),
@@ -1044,7 +1094,7 @@ class HomePage extends ConsumerWidget {
                                       const Duration(milliseconds: 1500),
                                   key: null,
                                   startProgress: 0.0,
-                                  endProgress: _zBucketEndProgress,
+                                  endProgress: _bucketsProgress[2],
                                   bucketName: BucketNameEnum.zBucket,
                                 ),
                               ),

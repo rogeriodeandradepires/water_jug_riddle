@@ -24,7 +24,7 @@ dependencies:
   hooks_riverpod: ^1.0.3
   flutter_hooks: ^0.18.2
   the_splash: ^0.2.0
-  flutter_native_splash: ^2.0.1
+  flutter_native_splash: ^1.3.2
 
 dev_dependencies:
   flutter_test:

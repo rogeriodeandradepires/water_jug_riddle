@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:water_jug_riddle/helper/enums.dart';
-import 'package:water_jug_riddle/state_mgmt/controllers/buckets_notifier.dart';
-import 'package:water_jug_riddle/state_mgmt/providers/buckets_providers.dart';
 import 'package:water_jug_riddle/ui/shared/colors.dart';
 import 'package:water_jug_riddle/ui/shared/text_styles.dart';
-import 'package:water_jug_riddle/ui/widgets/liquidify/wave_painter.dart';
-import 'package:water_jug_riddle/ui/widgets/liquidify/wave_painter_smaller.dart';
+import 'package:water_jug_riddle/ui/widgets/liquefy/wave_painter.dart';
+import 'package:water_jug_riddle/ui/widgets/liquefy/wave_painter_smaller.dart';
 
 class LiquidFill extends HookConsumerWidget {
-  // with TickerProviderStateMixin {
-
   LiquidFill({
     required ValueKey? key,
     required this.startProgress,
@@ -48,7 +43,9 @@ class LiquidFill extends HookConsumerWidget {
 
     loadController = useAnimationController(duration: loadDuration);
 
-    loadValue = Tween<double>(begin: startProgress, end: endProgress)
+    loadValue = Tween<double>(
+            begin: startProgress,
+            end: endProgress > 100.0 ? 100.0 : endProgress)
         .animate(loadController!);
 
     waveController!.repeat();
@@ -100,7 +97,7 @@ class LiquidFill extends HookConsumerWidget {
                 color: Colors.transparent,
                 child: Center(
                   child: SvgPicture.asset(
-                    'images/bucket_content.svg',
+                    'assets/images/bucket_content.svg',
                     height: 120,
                   ),
                 ),
@@ -117,7 +114,7 @@ class LiquidFill extends HookConsumerWidget {
               color: Colors.transparent,
               child: Center(
                 child: SvgPicture.asset(
-                  'images/bucket_frame_thicker.svg',
+                  'assets/images/bucket_frame_thicker.svg',
                   height: 120,
                   color: blackOlive,
                 ),

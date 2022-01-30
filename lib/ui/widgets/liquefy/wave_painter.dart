@@ -1,16 +1,15 @@
 import 'dart:math';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:water_jug_riddle/ui/shared/colors.dart';
 
-class WavePainterSmaller extends CustomPainter {
+class WavePainter extends CustomPainter {
   Animation<double>? waveAnimation;
   double? percentValue;
   double? boxHeight;
   Color? waveColor;
 
-  WavePainterSmaller(
+  WavePainter(
       {this.waveAnimation, this.percentValue, this.boxHeight, this.waveColor});
 
   @override
@@ -29,7 +28,7 @@ class WavePainterSmaller extends CustomPainter {
           stPatrickBlue,
         ],
       ).createShader(rect);
-    double _textHeight = 10;
+    double _textHeight = 70;
 
     double _percent = percentValue! / 100.0;
     double _baseHeight =
@@ -41,7 +40,7 @@ class WavePainterSmaller extends CustomPainter {
       path.lineTo(
           i,
           _baseHeight +
-              sin((i / width * 1 * pi) + (waveAnimation!.value * 2 * pi)) * 4);
+              sin((i / width * 2 * pi) + (waveAnimation!.value * 2 * pi)) * 8);
     }
 
     path.lineTo(width, height);
