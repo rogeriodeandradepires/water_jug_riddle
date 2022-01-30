@@ -938,9 +938,9 @@ class HomePage extends ConsumerWidget {
             '${double.parse('${_bucketsProgress[1]}').toStringAsFixed(0)}${kIsWeb ? '/${_bucketsCapacity[1]}' : ''}';
       }
 
-      if (_bucketsProgress[0] >= 100.0) {
+      if (_bucketsProgress[2] >= 100.0) {
         _zBucketStringValue =
-            '${_bucketsCapacity[2] > 10 ? '' : _bucketsCapacity[2]}';
+            '${_bucketsCapacity[2] > 10 ? '' : kIsWeb ? '${_bucketsCapacity[2]}/${_bucketsCapacity[2]}' : _bucketsCapacity[2]}';
       } else {
         _zBucketStringValue =
             '${double.parse('${_bucketsProgress[2]}').toStringAsFixed(0)}${kIsWeb ? '/${_bucketsCapacity[2]}' : ''}';

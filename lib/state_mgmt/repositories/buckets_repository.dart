@@ -150,11 +150,19 @@ class PublicBucketsRepository implements BucketsRepository {
   }
 
   // Returns steps needed to measure z buckets
-  static List<Map> calculateSteps(int xBucket, int yBucket, int z) {
+  static List<Map> calculateSteps(
+      int xBucketCapacity, int yBucketCapacity, int zBucketCapacity) {
     // If gcd of n and m does not divide d
     // then solution is not possible
+
+    if (zBucketCapacity > max(xBucketCapacity, yBucketCapacity)) {
+      return [
+        {'action': BucketActionsEnum.error}
+      ];
+    }
+
     try {
-      if ((z % gcd(yBucket, xBucket)) != 0) {
+      if ((zBucketCapacity % gcd(yBucketCapacity, xBucketCapacity)) != 0) {
         return [
           {'action': BucketActionsEnum.error}
         ];
@@ -173,8 +181,8 @@ class PublicBucketsRepository implements BucketsRepository {
     List<Map> firstCaseReturn;
 
     try {
-      firstCaseReturn =
-          pour(yBucket, xBucket, z, smallerBucket: BucketNameEnum.yBucket);
+      firstCaseReturn = pour(yBucketCapacity, xBucketCapacity, zBucketCapacity,
+          smallerBucket: BucketNameEnum.yBucket);
     } catch (e) {
       firstCaseReturn = [
         {'action': BucketActionsEnum.error}
@@ -186,8 +194,8 @@ class PublicBucketsRepository implements BucketsRepository {
     List<Map> secondCaseReturn;
 
     try {
-      secondCaseReturn =
-          pour(xBucket, yBucket, z, smallerBucket: BucketNameEnum.xBucket);
+      secondCaseReturn = pour(xBucketCapacity, yBucketCapacity, zBucketCapacity,
+          smallerBucket: BucketNameEnum.xBucket);
     } catch (e) {
       secondCaseReturn = [
         {'action': BucketActionsEnum.error}
