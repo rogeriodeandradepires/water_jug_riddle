@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:water_jug_riddle/helper/enums.dart';
 
 abstract class BucketsRepository {
@@ -37,6 +38,7 @@ class PublicBucketsRepository implements BucketsRepository {
   static List<Map> pour(int firstBucket, int secondBucket, int zBucket,
       {BucketNameEnum? smallerBucket}) {
     List<Map> _stepsList = [];
+    List<String> _changesList = [];
     // Initialize current amount of water in source and destination buckets
     int from = firstBucket;
     int to = 0;
@@ -45,14 +47,20 @@ class PublicBucketsRepository implements BucketsRepository {
     if (smallerBucket == BucketNameEnum.xBucket) {
       _stepsList.add({
         'action': BucketActionsEnum.fill,
-        'bucketName': BucketNameEnum.xBucket
+        'bucketName': BucketNameEnum.xBucket,
+        'bucketValue': from,
+        'bucketValueTo': to
       });
     } else {
       _stepsList.add({
         'action': BucketActionsEnum.fill,
-        'bucketName': BucketNameEnum.yBucket
+        'bucketName': BucketNameEnum.yBucket,
+        'bucketValue': from,
+        'bucketValueTo': to
       });
     }
+
+    _changesList.add('$from, $to');
 
     while (from != zBucket && to != zBucket) {
       // Find the maximum amount that can be
@@ -63,18 +71,24 @@ class PublicBucketsRepository implements BucketsRepository {
       to += temp;
       from -= temp;
 
+      _changesList.add('$from, $to');
+
       if (temp != 0) {
         if (smallerBucket == BucketNameEnum.xBucket) {
           _stepsList.add({
             'action': BucketActionsEnum.transfer,
             'bucketName': BucketNameEnum.xBucket,
-            'toBucketName': BucketNameEnum.yBucket
+            'toBucketName': BucketNameEnum.yBucket,
+            'bucketValue': from,
+            'bucketValueTo': to
           });
         } else {
           _stepsList.add({
             'action': BucketActionsEnum.transfer,
             'bucketName': BucketNameEnum.yBucket,
-            'toBucketName': BucketNameEnum.xBucket
+            'toBucketName': BucketNameEnum.xBucket,
+            'bucketValue': from,
+            'bucketValueTo': to
           });
         }
       }
@@ -83,40 +97,55 @@ class PublicBucketsRepository implements BucketsRepository {
 
       // If first bucket becomes empty, fill it
       if (from == 0) {
+        from = firstBucket;
+
+        _changesList.add('$from, $to');
+
         if (smallerBucket == BucketNameEnum.xBucket) {
           _stepsList.add({
             'action': BucketActionsEnum.fill,
-            'bucketName': BucketNameEnum.xBucket
+            'bucketName': BucketNameEnum.xBucket,
+            'bucketValue': from,
+            'bucketValueTo': to
           });
         } else {
           _stepsList.add({
             'action': BucketActionsEnum.fill,
-            'bucketName': BucketNameEnum.yBucket
+            'bucketName': BucketNameEnum.yBucket,
+            'bucketValue': from,
+            'bucketValueTo': to
           });
         }
-        from = firstBucket;
+
       }
 
       // If second bucket becomes full, empty it
       if (to == secondBucket) {
+        to = 0;
+
         if (smallerBucket == BucketNameEnum.yBucket) {
           _stepsList.add({
             'action': BucketActionsEnum.empty,
-            'bucketName': BucketNameEnum.xBucket
+            'bucketName': BucketNameEnum.xBucket,
+            'bucketValue': to,
+            'bucketValueTo': from
           });
         } else {
           _stepsList.add({
             'action': BucketActionsEnum.empty,
-            'bucketName': BucketNameEnum.yBucket
+            'bucketName': BucketNameEnum.yBucket,
+            'bucketValue': to,
+            'bucketValueTo': from
           });
         }
-        to = 0;
+
+        _changesList.add('$from, $to');
       }
     }
 
     // if (smallerBucket != null) {
+    //   // debugPrint(_stepsList.join('\n'));
     //   debugPrint(_changesList.join(' -> '));
-    //   debugPrint(_stepsList.join('\n'));
     // }
 
     return _stepsList;
@@ -128,7 +157,7 @@ class PublicBucketsRepository implements BucketsRepository {
     // then solution is not possible
     if ((z % gcd(yBucket, xBucket)) != 0) {
       return [
-        {'action': BucketActionsEnum.none}
+        {'action': BucketActionsEnum.error}
       ];
     }
 

@@ -9,9 +9,47 @@ import 'colors.dart';
 BoxDecoration mainBgDecoration = const BoxDecoration(
   gradient: LinearGradient(
     begin: Alignment.topCenter,
-    stops: [0,0.5,1],
+    stops: [0, 0.5, 1],
     end: FractionalOffset.bottomCenter,
     colors: [Colors.white, Colors.white, mainGradient2],
+  ),
+);
+
+BoxDecoration fullStepLineDecoration = BoxDecoration(
+  color: cultured,
+  borderRadius: const BorderRadius.all(Radius.circular(10)),
+  border: Border.all(
+    color: primaryColor,
+    width: 0.5,
+  ),
+);
+
+BoxDecoration superiorStepLineDecoration = BoxDecoration(
+  color: cultured,
+  borderRadius: const BorderRadius.only(
+      topRight: Radius.circular(10), topLeft: Radius.circular(10)),
+  border: Border.all(
+    color: primaryColor,
+    width: 0.5,
+  ),
+);
+
+BoxDecoration midStepLineDecoration = BoxDecoration(
+  color: cultured,
+  // borderRadius: const BorderRadius.all(Radius.circular(10)),
+  border: Border.all(
+    color: primaryColor,
+    width: 0.5,
+  ),
+);
+
+BoxDecoration inferiorStepLineDecoration = BoxDecoration(
+  color: cultured,
+  borderRadius: const BorderRadius.only(
+      bottomRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
+  border: Border.all(
+    color: primaryColor,
+    width: 0.5,
   ),
 );
 

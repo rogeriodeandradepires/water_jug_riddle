@@ -37,7 +37,7 @@ class BucketsNotifier extends StateNotifier<BucketsState> {
 
   changeBucketState(
       {required BucketNameEnum bucket, required BucketStatesEnum newState}) {
-    debugPrint('changeBucketState: $bucket, $newState');
+    // debugPrint('changeBucketState: $bucket, $newState');
     if (mounted) {
       switch (bucket) {
         case BucketNameEnum.xBucket:

@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:water_jug_riddle/helper/enums.dart';
+import 'package:water_jug_riddle/state_mgmt/controllers/buckets_notifier.dart';
 import 'package:water_jug_riddle/state_mgmt/providers/buckets_providers.dart';
 import 'package:water_jug_riddle/ui/shared/colors.dart';
+import 'package:water_jug_riddle/ui/shared/text_styles.dart';
 import 'package:water_jug_riddle/ui/widgets/liquidify/wave_painter.dart';
+import 'package:water_jug_riddle/ui/widgets/liquidify/wave_painter_smaller.dart';
 
 class LiquidFill extends HookConsumerWidget {
   // with TickerProviderStateMixin {
@@ -19,7 +22,9 @@ class LiquidFill extends HookConsumerWidget {
     required this.waveDuration,
     required this.boxHeight,
     required this.boxWidth,
+    required this.isSmallerBucket,
     required this.bucketName,
+    this.bucketStringValue,
     required this.boxBackgroundColor,
   }) : super(key: key);
 
@@ -29,9 +34,11 @@ class LiquidFill extends HookConsumerWidget {
   final Duration? waveDuration, loadDuration;
 
   late final Animation loadValue;
-  final double startProgress, endProgress;
+  double startProgress, endProgress;
+  String? bucketStringValue;
 
   final double boxHeight, boxWidth;
+  final bool isSmallerBucket;
 
   final Color boxBackgroundColor;
 
@@ -48,93 +55,87 @@ class LiquidFill extends HookConsumerWidget {
 
     loadController!.forward();
 
-    loadController?.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        if (startProgress == 0.0 && endProgress == 0.0) {
-          debugPrint("listener 1");
-        } else if (endProgress == 0.0) {
-          debugPrint("listener 2");
-          ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-              bucket: bucketName, newState: BucketStatesEnum.empty);
-        } else if (endProgress == 100.0) {
-          debugPrint("listener 3");
-          ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-              bucket: bucketName, newState: BucketStatesEnum.full);
-        } else {
-          debugPrint("listener 4");
-          ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-              bucket: bucketName, newState: BucketStatesEnum.partiallyFull);
-        }
-      }
-    });
-
-    bool _isEmpty = ref.watch(bucketsNotifierProvider.notifier.select((state) {
-      final _bucketsStateMap = state.model.bucketsCurrentStateMap;
-
-      return ref.read(bucketsNotifierProvider.notifier).checkBucketEmptiness(
-          bucketName: bucketName, bucketsStateMap: _bucketsStateMap);
-    }));
-
-    // debugPrint("_isEmpty: $_isEmpty");
+    bool _isEmpty = endProgress==0.0;
 
     return Stack(
       children: [
         //Wave
-        SizedBox(
-          height: boxHeight,
-          width: boxWidth,
-          child: _isEmpty
-              ? Container()
-              : AnimatedBuilder(
-                  animation: waveController!,
-                  builder: (BuildContext context, Widget? child) {
-                    return _isEmpty
-                        ? Container()
-                        : CustomPaint(
-                            painter: WavePainter(
-                              waveAnimation: waveController,
-                              percentValue: loadValue.value,
-                              boxHeight: boxHeight,
-                            ),
-                          );
-                  },
-                ),
+        Center(
+          child: SizedBox(
+            height: boxHeight,
+            width: boxWidth-15,
+            child: _isEmpty
+                ? Container()
+                : AnimatedBuilder(
+                    animation: waveController!,
+                    builder: (BuildContext context, Widget? child) {
+                      return _isEmpty
+                          ? Container()
+                          : CustomPaint(
+                              painter: isSmallerBucket ? WavePainterSmaller(
+                                waveAnimation: waveController,
+                                percentValue: loadValue.value,
+                                boxHeight: boxHeight,
+                              ) : WavePainter(
+                                waveAnimation: waveController,
+                                percentValue: loadValue.value,
+                                boxHeight: boxHeight,
+                              ),
+                            );
+                    },
+                  ),
+          ),
         ),
         //Shader
-        SizedBox(
-          height: boxHeight,
-          width: boxWidth,
-          child: ShaderMask(
-            blendMode: BlendMode.srcOut,
-            shaderCallback: (bounds) =>
-                LinearGradient(colors: [boxBackgroundColor], stops: const [0.0])
-                    .createShader(bounds),
-            child: Container(
-              color: Colors.transparent,
-              child: Center(
-                child: SvgPicture.asset(
-                  'images/bucket_content.svg',
-                  height: 120,
+        Center(
+          child: SizedBox(
+            height: boxHeight,
+            width: boxWidth,
+            child: ShaderMask(
+              blendMode: BlendMode.srcOut,
+              shaderCallback: (bounds) =>
+                  LinearGradient(colors: [boxBackgroundColor], stops: const [0.0])
+                      .createShader(bounds),
+              child: Container(
+                color: Colors.transparent,
+                child: Center(
+                  child: SvgPicture.asset(
+                    'images/bucket_content.svg',
+                    height: 120,
+                  ),
                 ),
               ),
             ),
           ),
         ),
         //Bucket
-        SizedBox(
-          height: boxHeight,
-          width: boxWidth,
-          child: Container(
-            color: Colors.transparent,
-            child: Center(
-              child: SvgPicture.asset(
-                'images/bucket_frame_thicker.svg',
-                height: 120,
-                color: blackOlive,
+        Center(
+          child: SizedBox(
+            height: boxHeight,
+            width: boxWidth,
+            child: Container(
+              color: Colors.transparent,
+              child: Center(
+                child: SvgPicture.asset(
+                  'images/bucket_frame_thicker.svg',
+                  height: 120,
+                  color: blackOlive,
+                ),
               ),
             ),
           ),
-        )
+        ),
+        isSmallerBucket ? Padding(
+          padding: const EdgeInsets.only(top: 40.0),
+          child: Text(
+            '$bucketStringValue',
+            style: balooRegular.copyWith(
+                fontSize: 16,
+                color: primaryColor,
+                height: 1),
+            textAlign: TextAlign.center,
+          ),
+        ) : Container()
       ],
     );
   }

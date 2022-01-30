@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 enum BucketStatesEnum { empty, full, partiallyFull }
-enum BucketActionsEnum { empty, fill, transfer, none }
+enum BucketActionsEnum { empty, fill, transfer, error, solved }
 enum AnimProgressEnum { startProgress, endProgress }
 
 extension BucketStatesEnumExtension on BucketStatesEnum {

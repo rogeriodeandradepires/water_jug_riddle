@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,170 +38,11 @@ class HomePage extends ConsumerWidget {
     }));
 
     final _stepsCount = _stepsList.length == 1 &&
-            _stepsList[0]['action'] == BucketActionsEnum.none
+            _stepsList[0]['action'] == BucketActionsEnum.error
         ? 0
         : _stepsList.length;
 
     final _isWebLargerLayout = kIsWeb && 100.wb >= Constants.tabletWidthScreen;
-
-    SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
-      if (_stepsList.isNotEmpty && _stepsCount > 0) {
-        if (_bucketsModel != null && _bucketsModel.shouldAnimate) {
-          ref.read(bucketsNotifierProvider.notifier).changeAnimateState(false);
-          for (Map _stepMap in _stepsList) {
-            bool _isFirstIndex = _stepsList.indexOf(_stepMap) == 0;
-            bool _isLastIndex =
-                _stepsList.indexOf(_stepMap) == _stepsList.length - 1;
-
-            BucketActionsEnum action = _stepMap['action'];
-            BucketNameEnum _bucketName =
-                _stepMap['bucketName'] ?? BucketNameEnum.zBucket;
-            BucketNameEnum _toBucketName;
-
-            switch (action) {
-              case BucketActionsEnum.fill:
-                Future.delayed(Duration(milliseconds: _isFirstIndex ? 0 : 2000),
-                    () {
-                  ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                      bucket: _bucketName, newState: BucketStatesEnum.full);
-
-                  if (_isLastIndex) {
-                    Future.delayed(const Duration(milliseconds: 2000), () {
-                      ref
-                          .read(bucketsNotifierProvider.notifier)
-                          .changeAnimateState(true);
-                    });
-                  }
-                });
-                break;
-              case BucketActionsEnum.transfer:
-                _toBucketName = _stepMap['toBucketName'];
-                Future.delayed(Duration(milliseconds: _isFirstIndex ? 0 : 2000),
-                    () {
-                  switch (_bucketsModel.bucketsPreviousStateMap[_bucketName]) {
-                    case BucketStatesEnum.empty:
-                      if (_bucketsModel.bucketsCurrentStateMap[_bucketName] ==
-                          BucketStatesEnum.partiallyFull) {
-                        ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                            bucket: _bucketName,
-                            newState: BucketStatesEnum.partiallyFull);
-                      }else if (_bucketsModel.bucketsCurrentStateMap[_bucketName] ==
-                          BucketStatesEnum.full) {
-                        ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                            bucket: _bucketName,
-                            newState: BucketStatesEnum.full);
-                      }
-                      break;
-                    case BucketStatesEnum.partiallyFull:
-                      if (_bucketsModel.bucketsCurrentStateMap[_bucketName] ==
-                          BucketStatesEnum.empty) {
-                        ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                            bucket: _bucketName,
-                            newState: BucketStatesEnum.empty);
-                      }else if (_bucketsModel.bucketsCurrentStateMap[_bucketName] ==
-                          BucketStatesEnum.full) {
-                        ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                            bucket: _bucketName,
-                            newState: BucketStatesEnum.full);
-                      }
-
-                      switch(_bucketsModel.bucketsPreviousStateMap[_toBucketName]){
-                        case BucketStatesEnum.empty:
-                          if (_bucketsModel.bucketsCurrentStateMap[_toBucketName] ==
-                              BucketStatesEnum.partiallyFull) {
-                            ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                                bucket: _toBucketName,
-                                newState: BucketStatesEnum.partiallyFull);
-                          }else if (_bucketsModel.bucketsCurrentStateMap[_toBucketName] ==
-                              BucketStatesEnum.full) {
-                            ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                                bucket: _toBucketName,
-                                newState: BucketStatesEnum.full);
-                          }
-                          break;
-                        case BucketStatesEnum.partiallyFull:
-                          if (_bucketsModel.bucketsCurrentStateMap[_toBucketName] ==
-                              BucketStatesEnum.empty) {
-                            ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                                bucket: _toBucketName,
-                                newState: BucketStatesEnum.empty);
-                          }else if (_bucketsModel.bucketsCurrentStateMap[_toBucketName] ==
-                              BucketStatesEnum.full) {
-                            ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                                bucket: _toBucketName,
-                                newState: BucketStatesEnum.full);
-                          }
-                          break;
-                        default://FULL
-                          if (_bucketsModel.bucketsCurrentStateMap[_toBucketName] ==
-                              BucketStatesEnum.partiallyFull) {
-                            ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                                bucket: _toBucketName,
-                                newState: BucketStatesEnum.partiallyFull);
-                          }else if (_bucketsModel.bucketsCurrentStateMap[_toBucketName] ==
-                              BucketStatesEnum.empty) {
-                            ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                                bucket: _toBucketName,
-                                newState: BucketStatesEnum.empty);
-                          }
-                          break;
-                      }
-
-                      break;
-                    default: //FULL
-                      if (_bucketsModel.bucketsCurrentStateMap[_bucketName] ==
-                          BucketStatesEnum.partiallyFull) {
-                        ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                            bucket: _bucketName,
-                            newState: BucketStatesEnum.partiallyFull);
-                      }else if (_bucketsModel.bucketsCurrentStateMap[_bucketName] ==
-                          BucketStatesEnum.empty) {
-                        ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                            bucket: _bucketName,
-                            newState: BucketStatesEnum.empty);
-                      }
-                      break;
-                  }
-
-
-                  // ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                  //     bucket: _toBucketName,
-                  //     newState: BucketStatesEnum.partiallyFull);
-
-                  if (_isLastIndex) {
-                    Future.delayed(const Duration(milliseconds: 2000), () {
-                      ref
-                          .read(bucketsNotifierProvider.notifier)
-                          .changeAnimateState(true);
-                    });
-                  }
-                });
-                break;
-              case BucketActionsEnum.empty:
-                Future.delayed(Duration(milliseconds: _isFirstIndex ? 0 : 2000),
-                    () {
-                  ref.read(bucketsNotifierProvider.notifier).changeBucketState(
-                      bucket: _bucketName, newState: BucketStatesEnum.empty);
-
-                  if (_isLastIndex) {
-                    Future.delayed(const Duration(milliseconds: 2000), () {
-                      ref
-                          .read(bucketsNotifierProvider.notifier)
-                          .changeAnimateState(true);
-                    });
-                  }
-                });
-                break;
-              default:
-                break;
-            }
-          }
-        }
-
-        // final _timer =
-        //     Timer.periodic(const Duration(milliseconds: 1500), (Timer t) {});
-      }
-    });
 
     return Scaffold(
       backgroundColor: backgroundBottom,
@@ -218,56 +58,178 @@ class HomePage extends ConsumerWidget {
             scrollbars: false,
           ),
           child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
                 _buildBucketsSession(context, _stepsCount, _isWebLargerLayout,
                     _bucketsModel, _stepsList),
                 //Steps List
-                ShaderMask(
-                  shaderCallback: (rect) {
-                    return const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.black, Colors.transparent],
-                    ).createShader(Rect.fromLTRB(rect.width, 25, 0, 0));
-                  },
-                  blendMode: BlendMode.dstIn,
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context).copyWith(
-                      dragDevices: {
-                        PointerDeviceKind.touch,
-                        PointerDeviceKind.mouse,
-                      },
-                      scrollbars: false,
-                    ),
+                ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(
+                    dragDevices: {
+                      PointerDeviceKind.touch,
+                      PointerDeviceKind.mouse,
+                    },
+                    scrollbars: false,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        right: 22.0, left: 22.0, top: 14.0),
                     child: ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemCount: _stepsList.length,
                       itemBuilder: (context, index) {
-                        final _stepText = getStepText(context,
-                            index: index + 1, currentMap: _stepsList[index]);
+                        final _isFirstItem = index == 0;
+                        final _isLastItem = index == _stepsList.length - 1;
 
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 40.0),
-                            child: Text(
-                              _stepText,
-                              style: balooRegular.copyWith(
-                                  fontSize: kIsWeb ? 16 : 13,
-                                  color: primaryColor,
-                                  height: 1),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
+                        Map _currentMap = _stepsList[index];
+                        BucketActionsEnum _action = _currentMap['action'];
+
+                        if (_action == BucketActionsEnum.error) {
+                          return _getListItem(
+                              context,
+                              _isFirstItem,
+                              true,
+                              index,
+                              AppLocalizations.of(context)!.action_no_solution,
+                              '',
+                              '',
+                              '',
+                              0.0,
+                              0.0,
+                              0.0,
+                              0,
+                              isError: true);
+                        }
+
+                        final _xBucketCapacity =
+                            _bucketsModel?.bucketsCapacityList[0] ?? 0;
+                        final _yBucketCapacity =
+                            _bucketsModel?.bucketsCapacityList[1] ?? 0;
+                        final _zBucketCapacity =
+                            _bucketsModel?.bucketsCapacityList[2] ?? 0;
+
+                        BucketNameEnum _bucketName = _currentMap['bucketName'];
+
+                        final _stepText = getStepText(context,
+                            currentMap: _currentMap, action: _action);
+
+                        double _bucketValue = _currentMap['bucketValue'];
+                        double _bucketValueTo = _currentMap['bucketValueTo'];
+
+                        double _xBucketEndProgress = 0.0;
+                        double _yBucketEndProgress = 0.0;
+                        double _zBucketEndProgress = 0.0;
+
+                        switch (_bucketName) {
+                          case BucketNameEnum.xBucket:
+                            _xBucketEndProgress = _bucketValue;
+                            _yBucketEndProgress = _bucketValueTo;
+                            break;
+                          case BucketNameEnum.yBucket:
+                            _xBucketEndProgress = _bucketValueTo;
+                            _yBucketEndProgress = _bucketValue;
+                            break;
+                          default:
+                            break;
+                        }
+
+                        if (_action == BucketActionsEnum.transfer) {
+                          switch (_bucketName) {
+                            case BucketNameEnum.xBucket:
+                              _yBucketEndProgress = _bucketValueTo;
+                              break;
+                            case BucketNameEnum.yBucket:
+                              _xBucketEndProgress = _bucketValueTo;
+                              break;
+                            default:
+                              break;
+                          }
+                        }
+
+                        String _xBucketStringValue =
+                            '$_xBucketEndProgress/$_xBucketCapacity';
+                        String _yBucketStringValue =
+                            '$_yBucketEndProgress/$_yBucketCapacity';
+                        String _zBucketStringValue =
+                            '$_zBucketEndProgress/$_zBucketCapacity';
+
+                        if (_xBucketCapacity != 0 &&
+                            _xBucketEndProgress != 0 &&
+                            _xBucketEndProgress == _xBucketCapacity) {
+                          _xBucketEndProgress = 100.0;
+                        }
+
+                        if (_yBucketCapacity != 0 &&
+                            _yBucketEndProgress != 0 &&
+                            _yBucketEndProgress == _yBucketCapacity) {
+                          _yBucketEndProgress = 100.0;
+                        }
+
+                        if (_zBucketCapacity != 0 &&
+                            _zBucketEndProgress != 0 &&
+                            _zBucketEndProgress == _zBucketCapacity) {
+                          _zBucketEndProgress = 100.0;
+                        }
+
+                        return _isLastItem
+                            ? Column(
+                                children: [
+                                  _getListItem(
+                                    context,
+                                    _isFirstItem,
+                                    false,
+                                    index,
+                                    _stepText,
+                                    _xBucketStringValue,
+                                    _yBucketStringValue,
+                                    _zBucketStringValue,
+                                    _xBucketEndProgress,
+                                    _yBucketEndProgress,
+                                    _zBucketEndProgress,
+                                    _zBucketCapacity,
+                                  ),
+                                  _getListItem(
+                                    context,
+                                    false,
+                                    true,
+                                    index,
+                                    _stepText,
+                                    '0/$_xBucketCapacity',
+                                    '0/$_yBucketCapacity',
+                                    '$_zBucketCapacity/$_zBucketCapacity',
+                                    0.0,
+                                    0.0,
+                                    _zBucketCapacity == 0 &&
+                                            _zBucketEndProgress == 0
+                                        ? 0.0
+                                        : 100.0,
+                                    _zBucketCapacity,
+                                  )
+                                ],
+                              )
+                            : _getListItem(
+                                context,
+                                _isFirstItem,
+                                _isLastItem,
+                                index,
+                                _stepText,
+                                _xBucketStringValue,
+                                _yBucketStringValue,
+                                _zBucketStringValue,
+                                _xBucketEndProgress,
+                                _yBucketEndProgress,
+                                _zBucketEndProgress,
+                                _zBucketCapacity,
+                              );
                       },
                     ),
                   ),
                 ),
                 const SizedBox(
                   height: 60,
-                )
+                ),
               ],
             ),
           ),
@@ -329,20 +291,26 @@ class HomePage extends ConsumerWidget {
     }
   }
 
-  String getStepText(context, {required int index, required Map currentMap}) {
-    BucketActionsEnum action = currentMap['action'];
+  String getStepText(context, {required Map currentMap, required action}) {
     BucketNameEnum _bucketName =
         currentMap['bucketName'] ?? BucketNameEnum.zBucket;
     BucketNameEnum _toBucketName;
 
     switch (action) {
       case BucketActionsEnum.fill:
-        return '$index. ${AppLocalizations.of(context)!.action_fill.replaceAll('{bucket}', _bucketName.short)}';
+        return AppLocalizations.of(context)!
+            .action_fill
+            .replaceAll('{bucket}', _bucketName.short);
       case BucketActionsEnum.transfer:
         _toBucketName = currentMap['toBucketName'];
-        return '$index. ${AppLocalizations.of(context)!.action_transfer.replaceAll('{from}', _bucketName.short).replaceAll('{to}', _toBucketName.short)}';
+        return AppLocalizations.of(context)!
+            .action_transfer
+            .replaceAll('{from}', _bucketName.short)
+            .replaceAll('{to}', _toBucketName.short);
       case BucketActionsEnum.empty:
-        return '$index. ${AppLocalizations.of(context)!.action_empty.replaceAll('{bucket}', _bucketName.short)}';
+        return AppLocalizations.of(context)!
+            .action_empty
+            .replaceAll('{bucket}', _bucketName.short);
       default:
         return AppLocalizations.of(context)!.action_no_solution;
     }
@@ -424,9 +392,7 @@ class HomePage extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 60.0, left: 22, right: 22),
               child: Text(
-                _stepsCount == 0
-                    ? AppLocalizations.of(context)!.home_page_info
-                    : AppLocalizations.of(context)!.bucket_session_step_label,
+                AppLocalizations.of(context)!.home_page_info,
                 style: balooRegular.copyWith(
                     fontSize: kIsWeb ? 19 : 16, color: primaryColor),
                 textAlign: TextAlign.center,
@@ -453,18 +419,18 @@ class HomePage extends ConsumerWidget {
                         children: [
                           //Bucket X
                           SizedBox(
-                            // height: 25.hb,
                             child: LiquidFill(
+                              isSmallerBucket: false,
                               boxBackgroundColor: Colors.white,
                               boxHeight: 120,
                               boxWidth: 120,
                               loadDuration: const Duration(seconds: 2),
                               waveDuration: const Duration(milliseconds: 1500),
                               key: null,
-                              startProgress: _fillingProgresses[0]
-                                  [AnimProgressEnum.startProgress],
-                              endProgress: _fillingProgresses[0]
-                                  [AnimProgressEnum.endProgress],
+                              startProgress: 0.0,
+                              endProgress: _xBucketCapacity * 10 > 100
+                                  ? 100.0
+                                  : _xBucketCapacity * 10,
                               bucketName: BucketNameEnum.xBucket,
                             ),
                           ),
@@ -600,18 +566,18 @@ class HomePage extends ConsumerWidget {
                         children: [
                           //Bucket Y
                           SizedBox(
-                            // height: 25.hb,
                             child: LiquidFill(
+                              isSmallerBucket: false,
                               boxBackgroundColor: Colors.white,
                               boxHeight: 120,
                               boxWidth: 120,
                               loadDuration: const Duration(seconds: 2),
                               waveDuration: const Duration(milliseconds: 1500),
                               key: null,
-                              startProgress: _fillingProgresses[0]
-                                  [AnimProgressEnum.startProgress],
-                              endProgress: _fillingProgresses[0]
-                                  [AnimProgressEnum.endProgress],
+                              startProgress: 0.0,
+                              endProgress: _yBucketCapacity * 10 > 100
+                                  ? 100.0
+                                  : _yBucketCapacity * 10,
                               bucketName: BucketNameEnum.yBucket,
                             ),
                           ),
@@ -747,18 +713,18 @@ class HomePage extends ConsumerWidget {
                         children: [
                           //Bucket Z
                           SizedBox(
-                            // height: 25.hb,
                             child: LiquidFill(
+                              isSmallerBucket: false,
                               boxBackgroundColor: Colors.white,
                               boxHeight: 120,
                               boxWidth: 120,
                               loadDuration: const Duration(seconds: 2),
                               waveDuration: const Duration(milliseconds: 1500),
                               key: null,
-                              startProgress: _fillingProgresses[0]
-                                  [AnimProgressEnum.startProgress],
-                              endProgress: _fillingProgresses[0]
-                                  [AnimProgressEnum.endProgress],
+                              startProgress: 0.0,
+                              endProgress: _zBucketCapacity * 10 > 100
+                                  ? 100.0
+                                  : _zBucketCapacity * 10,
                               bucketName: BucketNameEnum.zBucket,
                             ),
                           ),
@@ -930,5 +896,167 @@ class HomePage extends ConsumerWidget {
         ],
       );
     });
+  }
+
+  _getListItem(
+      BuildContext context,
+      _isFirstItem,
+      _isLastItem,
+      index,
+      _stepText,
+      _xBucketStringValue,
+      _yBucketStringValue,
+      _zBucketStringValue,
+      _xBucketEndProgress,
+      _yBucketEndProgress,
+      _zBucketEndProgress,
+      _zBucketCapacity,
+      {bool? isError}) {
+
+    BoxDecoration decoration;
+
+    if (isError ?? false) {
+      decoration = fullStepLineDecoration;
+    } else if (_isFirstItem) {
+      decoration = superiorStepLineDecoration;
+    } else if (_isLastItem) {
+      decoration = inferiorStepLineDecoration;
+    } else {
+      decoration = midStepLineDecoration;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      decoration: decoration,
+      child: isError ?? false
+          ? Center(
+              child: Text(
+                _isLastItem
+                    ? AppLocalizations.of(context)!.action_no_solution
+                    : _stepText,
+                style: balooRegular.copyWith(
+                    fontSize: kIsWeb ? 19 : 16, color: primaryColor, height: 1),
+                textAlign: TextAlign.center,
+              ),
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                //Step Number
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    _isLastItem ? '' : '${index + 1}',
+                    style: balooRegular.copyWith(
+                        fontSize: kIsWeb ? 19 : 16,
+                        color: primaryColor,
+                        height: 1),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                //Step Description
+                Expanded(
+                  flex: 5,
+                  child: Center(
+                    child: Text(
+                      _isLastItem
+                          ? AppLocalizations.of(context)!.action_solved
+                          : _stepText,
+                      style: balooRegular.copyWith(
+                          fontSize: kIsWeb ? 19 : 16,
+                          color: primaryColor,
+                          height: 1),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                //Step Buckets
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    child: SizedBox(
+                      width: 160,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 5, left: 5),
+                              child: SizedBox(
+                                child: LiquidFill(
+                                  isSmallerBucket: true,
+                                  bucketStringValue: _xBucketStringValue,
+                                  boxBackgroundColor: cultured,
+                                  boxHeight: 40,
+                                  boxWidth: 40,
+                                  loadDuration: const Duration(seconds: 2),
+                                  waveDuration:
+                                      const Duration(milliseconds: 1500),
+                                  key: null,
+                                  startProgress: 0.0,
+                                  endProgress: _xBucketEndProgress,
+                                  bucketName: BucketNameEnum.xBucket,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 5, left: 5),
+                              child: SizedBox(
+                                child: LiquidFill(
+                                  isSmallerBucket: true,
+                                  bucketStringValue: _yBucketStringValue,
+                                  boxBackgroundColor: cultured,
+                                  boxHeight: 40,
+                                  boxWidth: 40,
+                                  loadDuration: const Duration(seconds: 2),
+                                  waveDuration:
+                                      const Duration(milliseconds: 1500),
+                                  key: null,
+                                  startProgress: 0.0,
+                                  endProgress: _yBucketEndProgress,
+                                  bucketName: BucketNameEnum.yBucket,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 5, left: 5),
+                              child: SizedBox(
+                                // height: 25.hb,
+                                child: LiquidFill(
+                                  isSmallerBucket: true,
+                                  bucketStringValue: _zBucketStringValue,
+                                  boxBackgroundColor: cultured,
+                                  boxHeight: 40,
+                                  boxWidth: 40,
+                                  loadDuration: const Duration(seconds: 2),
+                                  waveDuration:
+                                      const Duration(milliseconds: 1500),
+                                  key: null,
+                                  startProgress: 0.0,
+                                  endProgress: _zBucketEndProgress,
+                                  bucketName: BucketNameEnum.zBucket,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
   }
 }
